@@ -657,8 +657,11 @@
     NSString* microphoneResource = @"CDVCapture.bundle/microphone";
 
     BOOL isIphone5 = ([[UIScreen mainScreen] bounds].size.width == 568 && [[UIScreen mainScreen] bounds].size.height == 320) || ([[UIScreen mainScreen] bounds].size.height == 568 && [[UIScreen mainScreen] bounds].size.width == 320);
+    BOOL isIphone11 = ([[UIScreen mainScreen] bounds].size.width == 896 && [[UIScreen mainScreen] bounds].size.height == 414) || ([[UIScreen mainScreen] bounds].size.height == 896 && [[UIScreen mainScreen] bounds].size.width == 414);	
     if (isIphone5) {
         microphoneResource = @"CDVCapture.bundle/microphone-568h";
+    } else if (isIphone11) {	
+        microphoneResource = @"CDVCapture.bundle/microphone-iphone11";	
     }
 
     NSBundle* cdvBundle = [NSBundle bundleForClass:[CDVCapture class]];
@@ -704,7 +707,12 @@
     self.recordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/record_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
     self.stopRecordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/stop_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
     self.recordButton.accessibilityTraits |= [self accessibilityTraits];
-    self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewRect.size.width - recordImage.size.width) / 2, (microphone.size.height + (grayBkg.size.height - recordImage.size.height) / 2), recordImage.size.width, recordImage.size.height)];
+    // If greater than ios 13.4	and ipad
+    if ((@available(iOS 13.5, *)) && ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)) {	
+        self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewRect.size.width - recordImage.size.width - 10) / 2, (microphone.size.height - 34 + (grayBkg.size.height - recordImage.size.height - 10) / 2), recordImage.size.width-10, recordImage.size.height-10)];	
+    } else {    
+    	self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewRect.size.width - recordImage.size.width) / 2, (microphone.size.height + (grayBkg.size.height - recordImage.size.height) / 2), recordImage.size.width, recordImage.size.height)];
+    }
     [self.recordButton setAccessibilityLabel:PluginLocalizedString(captureCommand, @"toggle audio recording", nil)];
     [self.recordButton setImage:recordImage forState:UIControlStateNormal];
     [self.recordButton addTarget:self action:@selector(processButton:) forControlEvents:UIControlEventTouchUpInside];
